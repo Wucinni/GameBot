@@ -106,7 +106,7 @@ def get_window_size_and_location(hwnd):
 
 def on_dropdown_select(event):
     '''
-    Function handles the Tkinter dropdown even in GUI
+    Function handles the Tkinter dropdown event in GUI
     input - Tkinter event
     output - None
     '''
@@ -248,7 +248,7 @@ def revive():
                     running_state = False
 
                     # Move mouse to revive button location and press
-                    pyautogui.moveTo(revive_location[0], revive_location[1], 0.05)
+                    pyautogui.moveTo(revive_location[0], revive_location[1],430.05)
                     pyautogui.click(button='left')
                     time.sleep(0.1)
                     pyautogui.moveTo(300, 300)
@@ -393,6 +393,7 @@ def change_buttons_state(key_name, button, start_logo, stop_logo):
           - stop_logo; Type Tkinter PhotoImage object
     output - None
     '''
+    # If button state is False -> set value to True
     if not globals().get(key_name + "_state"):
         globals()[key_name + "_state"] = True
         button.config(image=start_logo)
@@ -403,11 +404,10 @@ def change_buttons_state(key_name, button, start_logo, stop_logo):
             message_box_thread = Thread(target=display_message_box)
             message_box_thread.start()
             message_box_response = tk.messagebox.showinfo(message="Click revive button location.")
+    # If button state is True -> set value to False
     else:
         globals()[key_name + "_state"] = False
         button.config(image=stop_logo)
-
-    
 
 
 def main():
