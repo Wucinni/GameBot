@@ -314,6 +314,11 @@ def revive():
 
 
 def windows_notification(message):
+    '''
+    Function creates a windows notification when bot starts or stops
+    input - message; Type STR
+    output - None
+    '''
     try:
         toast = ToastNotifier()
         toast.show_toast(
@@ -323,8 +328,9 @@ def windows_notification(message):
         icon_path = None,
         threaded = True,
         )
-    except:
-        pass # Implement notification error
+    except Exception as error:
+        pass  # Implement notification error
+
 
 def start(running_button, running_start_logo, running_stop_logo):
     '''
@@ -334,14 +340,14 @@ def start(running_button, running_start_logo, running_stop_logo):
     '''
     global running_state
     keyboard.wait("f5")
-    # If not running -> run, start threads and start itself again
+    # If not running -> send notification, run, start threads and start itself again
     if not running_state:
         windows_notification("Bot has started.")
         running_state = True
         running_button.config(image=running_start_logo)
         run_threads()
         start(running_button, running_start_logo, running_stop_logo)
-    # If running -> set flag to False, all threads stop and run itself again
+    # If running -> send notification, set flag to False, all threads stop and run itself again
     else:
         windows_notification("Bot has stopped.")
         running_state = False
@@ -351,7 +357,7 @@ def start(running_button, running_start_logo, running_stop_logo):
 
 def display_message_box():
     '''
-    Function handles a GUI pop-up and saves mouse input location
+    Function handles a GUI pop-up and saves mouse location
     input - None
     output - None
     '''
@@ -391,6 +397,7 @@ def change_buttons_state(key_name, button, start_logo, stop_logo):
         globals()[key_name + "_state"] = True
         button.config(image=start_logo)
 
+        # For revive thread, create pop-up window and get attack_button position
         if key_name == "revive":
             global message_box_response
             message_box_thread = Thread(target=display_message_box)
@@ -579,7 +586,7 @@ def main():
     start_thread.start()
 
     root.resizable(False, False)
-    root.after(time_to_die_in_seconds * 1000, lambda: root.destroy()) # Destroy the widget after n seconds
+    root.after(time_to_die_in_seconds * 1000, lambda: root.destroy())  # Destroy the widget after n seconds
     root.mainloop()
 
 
