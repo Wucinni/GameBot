@@ -27,11 +27,11 @@ Gamebot is composed of two single-window GUIs made with Tkinter
 It is split in 2 version:
 -LevelBot which is able to press keys and click on revive button and auto-attack window implemented in game:
 
-![](README_Assets/Level_Bot.png)
+![](README_Assets/LevelBot.png)
 
 -EnergyBot which is able to grind energy fragments by putting them on the alchemist; EnergyBot is semi-automated since it still needs user assistance and monitoring:
 
-![](README_Assets/Energy_Bot.png)
+![](README_Assets/EnergyBot.png)
 
 ## Roadmap
 
