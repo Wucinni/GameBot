@@ -14,8 +14,8 @@ It is able to:
 You will need the latest Python version available, preferably 3.10 which this bot was created in.
 
 <details><summary>Instructions</summary>
-1.Install Python (preferably 3.10, any later version should be fine).
-2.Install all the required packages by running autoconfig.py for each functionality.
+1. Install Python (preferably 3.10, any later version should be fine).
+2. Install all the required packages by running autoconfig.py for each functionality.
 3. Everything is done, just run main.py and enjoy!
 </details>
 
