@@ -1,0 +1,1 @@
+2024-03-08 20:26:13.274118: <class '_tkinter.TclError'> FILE:main.py Line:589
