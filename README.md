@@ -1,4 +1,4 @@
-# GameBot
+![](readme_assets/m2logo.png) # GameBot
 Simple bot for M2 to send key inputs, automate mouse movement and detect images on screen.
 
 It is split in 2 version:
