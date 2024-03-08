@@ -34,7 +34,6 @@ time_to_die_in_seconds = 999999 # Default 6 hours (21600); when the script will 
 window_position = (0, 0, 1920, 1080)
 file_name = os.path.basename(__file__)
 path = os.path.abspath(__file__)
-window_position = None
 options = [] # List of handles
 hwnd = None # Current handle
 
