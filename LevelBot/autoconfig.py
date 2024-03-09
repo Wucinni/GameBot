@@ -1,7 +1,7 @@
 import sys
 import subprocess
 
-module_list = ["pywin32", "pydirectinput", "opencv-python", "tk", "thread6", "keyboard", "pyautogui", "win32gui", "datetime", "pynput", "win10toast"]
+module_list = ["datetime", "keyboard", "opencv-python", "pyautogui", "pydirectinput", "pynput", "pywin32", "thread6", "tk", "win10toast", "win32gui"]
 
 for module in module_list:
     try:

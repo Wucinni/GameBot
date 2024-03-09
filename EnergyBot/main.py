@@ -1,4 +1,15 @@
+#############################################
+#                                           #
+#   This script creates a GUI for a game    #
+#               automation                  #
+#                                           #
+#   It handles mouse, keyboard, windows and #
+#       implements image detection          #
+#                                           #
+#############################################
+
 import ctypes
+import datetime
 import keyboard
 import os
 import pyautogui
@@ -7,83 +18,102 @@ from pynput import mouse
 import sys
 from threading import *
 import time
-import tkinter as tk
 import tkinter.messagebox
+import tkinter as tk
 import win32gui
 
 
+# Script and window variables
 window_position = (0, 0, 1920, 1080)
+file_name = os.path.basename(__file__)
 path = os.path.abspath(__file__)
-
 options = []
-dropdown = None
-selected_option = None
 
-buy_status_button = None
-craft_status_button = None
-start_button_logo = None
-stop_button_logo = None
-buy_key_label = None
-craft_key_label = None
-alchemist_button = None
-alchemist_location = [0, 0]
+# Game variables
+npc_location = [0, 0]
 
-buy_status = 1
-craft_status = 1
+# Default keys for buttons
 buy_key = "1"
 craft_key = "2"
 
 
 def is_admin():
+    """
+        Function returns whether the script is run as administrator or not
+        input - None
+        output - Integer based boolean: 0 or 1
+    """
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except Exception.args:
         return False
 
 
-def add_option(new_option):
+def add_hwnd_option(new_option):
+    """
+        Function appends a new integer value for the window handle to the dropdown selection list
+        input - new window handle; type INT
+        output - None
+    """
     if new_option:
         options.append(new_option)
         dropdown['values'] = tuple(options)
 
 
 def get_window_handles():
-    global options
+    """
+        Function wraps all the window handles for the Windows API
+        input - None
+        output - None
+    """
 
     def get_handles(hwnd, *args):
-
         if win32gui.GetWindowText(hwnd) == "METIN2" and hwnd not in options:
-            add_option(hwnd)
+            add_hwnd_option(hwnd)
         return hwnd
+
     win32gui.EnumWindows(get_handles, None)
 
 
 def get_window_size_and_location(hwnd):
-    rect = win32gui.GetWindowRect(hwnd)
-    x = rect[0]
-    y = rect[1]
-    w = rect[2] - x
-    h = rect[3] - y
-    print("Window %s:" % win32gui.GetWindowText(hwnd))
-    print("\tLocation: (%d, %d)" % (x, y))
-    print("\t    Size: (%d, %d)" % (w, h))
+    """
+        Function retrieves window physical details
+        input - window handle; Type INT
+        output - position, height, width; type INT Tuple
+    """
+    rectangle = win32gui.GetWindowRect(hwnd)
+    x = rectangle[0]
+    y = rectangle[1]
+    width = rectangle[2] - x
+    height = rectangle[3] - y
+
     win32gui.SetForegroundWindow(hwnd)
 
-    return x, y, w, h
+    return x, y, width, height
 
 
 def on_dropdown_select(event):
-    global window_position
+    """
+        Function handles the Tkinter dropdown event in GUI
+        input - Tkinter event
+        output - None
+    """
     selected_value = selected_option.get()
-    print(f"Selected option: {selected_value}")
     get_window_handles()
     window_position = get_window_size_and_location(selected_value)
 
 
 def search_image_and_get_coordinates(image_path, search_area=None):
+    """
+            Function detects an image on the screen and retrieves its center coordinates
+            input - image path; Type STR
+                  - search_area; Type INT LIST
+            output - image center; type INT TUPLE or None
+    """
     screenshot = pyautogui.screenshot()
     x, y, w, z = 0, 0, 0, 0
 
+    # Search image on screen
     if search_area:
         if search_area[0] > 0:
             x = search_area[0]
@@ -94,134 +124,168 @@ def search_image_and_get_coordinates(image_path, search_area=None):
         if search_area[3] > 0:
             z = search_area[3]
         search_zone = (x, y, w, z)
-        print("\nZone: ", search_zone, search_area, search_area[3], z, "\n")
-        print(search_area[3], search_area[3]>0)
         location = pyautogui.locateOnScreen(image_path, region=search_zone, confidence=0.8)
     else:
         location = pyautogui.locateOnScreen(image_path, confidence=0.8)
 
+    # If image was found, return center coordinates
     if location is not None:
         x, y, width, height = location
         center_x = x + width // 2
         center_y = y + height // 2
         return center_x, center_y
+
+    # In case of fail return None
     else:
         return None
 
 
-def buy():
-    global buy_status_button, start_button_logo, stop_button_logo, buy_status, buy_key
+def buy(button, start_logo, stop_logo):
+    """
+        This function will buy(right click) a specific item when the NPC window is open
+        input - None
+        output - None
+    """
     running = False
 
-    def check_stop_buy():
+    def buy_item():
+        """
+            This function will detect a specific item on screen and right-click on it
+            input - None
+            output - None
+        """
         while running:
-            if search_image_and_get_coordinates(path[0:-8] + "\\shop.png", window_position) is not None:
-                knife_location = search_image_and_get_coordinates(path[0:-8] + "\\knife.png", window_position)
-
-                if knife_location is not None:
-                    pyautogui.moveTo(knife_location[0], knife_location[1], 0.05)
-                    pyautogui.click(button='right')
-                    time.sleep(0.5)
-
-    buy_check_stop = Thread(target=check_stop_buy)
-    buy_check_stop.start()
+            try:
+                # If window is on screen and item was detected right click on it every 0.5 seconds
+                if search_image_and_get_coordinates(path[:len(path)-len(file_name)] + "assets\\shop.png", window_position):
+                    if knife_location := search_image_and_get_coordinates(path[:len(path)-len(file_name)] + "assets\\knife.png", window_position):
+                        pyautogui.moveTo(knife_location[0], knife_location[1], 0.05)
+                        pyautogui.click(button='right')
+                        time.sleep(0.5)
+            except:
+                pass  # Solve error when function can't find object on screen
 
     while True:
         keyboard.wait(str(buy_key))
 
+        # If not running, start thread and change button image
         if not running:
             running = True
-            buy_status_button.config(image=stop_button_logo)
-            mouse_thread = Thread(target=check_stop_buy)
+            button.config(image=stop_logo)
+
+            mouse_thread = Thread(target=buy_item)
+            mouse_thread.daemon = True
             mouse_thread.start()
+
+        # If running, stop and change button image
         else:
             running = False
-            buy_status_button.config(image=start_button_logo)
+            button.config(image=start_logo)
 
 
-def craft():
-    global craft_status_button, start_button_logo, stop_button_logo, craft_status, craft_key
+def craft(button, start_logo, stop_logo):
+    """
+        This function will detect the NPC and move the item on it
+        input - None
+        output - None
+    """
     running = False
 
-    def check_stop_craft():
+    def craft_item():
         while running:
-                knife_location = None
-                try:
-                    knife_location = search_image_and_get_coordinates(path[0:-8] + "\\knife.png", window_position)
-                except:
-                    pass
-                
-                if knife_location is not None:
+            try:
+                # If knife was found place it on NPC and press enter twice
+                if knife_location := search_image_and_get_coordinates(path[:len(path)-len(file_name)] + "assets\\knife.png", window_position):
                     pyautogui.moveTo(knife_location[0], knife_location[1], 0.2)
                     pyautogui.click(button='left')
 
-                    pyautogui.moveTo(alchemist_location[0], alchemist_location[1], 0.2)
+                    pyautogui.moveTo(npc_location[0], npc_location[1], 0.2)
                     pyautogui.click(button='left')
-                    
+
                     time.sleep(0.3)
                     pydirectinput.press("enter")
                     time.sleep(0.2)
                     pydirectinput.press("enter")
+            except:
+                pass  # Solve error when function can't find object on screen
 
-    craft_check_stop = Thread(target=check_stop_craft)
-    craft_check_stop.daemon = True
-    craft_check_stop.start()
 
     while True:
         keyboard.wait(str(craft_key))
 
+        # If not running, start thread and change button image
         if not running:
             running = True
-            craft_status_button.config(image=stop_button_logo)
-            mouse_thread = Thread(target=check_stop_craft)
+            button.config(image=stop_logo)
+
+            mouse_thread = Thread(target=craft_item)
+            mouse_thread.daemon = True
             mouse_thread.start()
+
+        # If running, stop and change button image
         else:
             running = False
-            craft_status_button.config(image=start_button_logo)
+            button.config(image=start_logo)
 
 
-def change_buy_key():
-    global buy_key, buy_key_label
+def change_buy_key(label):
+    """
+        Function changes the key required to run buy function
+        input - None
+        output - None
+    """
+    global buy_key
     buy_key = keyboard.read_key()
 
     buy_key_text = tk.StringVar()
     buy_key_text.set(buy_key)
-    buy_key_label.config(textvariable=buy_key_text)
+    label.config(textvariable=buy_key_text)
 
 
-def change_craft_key():
-    global craft_key, craft_key_label
+def change_craft_key(label):
+    """
+        Function changes the key required to run craft function
+        input - None
+        output - None
+    """
+    global craft_key
     craft_key = keyboard.read_key()
 
     craft_key_text = tk.StringVar()
     craft_key_text.set(craft_key)
-    craft_key_label.config(textvariable=craft_key_text)
+    label.config(textvariable=craft_key_text)
 
-def alchemist_button_location():
-    tk.messagebox.showinfo(message="Click revive button location.")
-    
+
+def set_npc_location():
+    """
+        Function will display pop-up window on screen and then save next left-click location
+        input - None
+        output - None
+    """
+    tk.messagebox.showinfo(message="Click NPC location on screen.")
+
+    # Save next left click location
     def on_click(x, y, button, pressed):
-        global alchemist_location
+        global npc_location
         if button == mouse.Button.left:
-            alchemist_location = [x, y]
+            npc_location = [x, y]
             return False
 
     with mouse.Listener(on_click=on_click) as listener:
         listener.join()
 
-    tk.messagebox.showinfo(message=f"Location: {alchemist_location[0]}, {alchemist_location[1]}.")
+    # Display saved location
+    tk.messagebox.showinfo(message=f"Location: {npc_location[0]}, {npc_location[1]}.")
 
 
 def main():
     admin = True
+    # Run whole app as admininstrator if privileges are set to 0
     if not is_admin() and admin:
-        # Re-run the script with administrator privileges
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 0)
         return
 
-    global dropdown, selected_option, start_button_logo, stop_button_logo, buy_key, craft_key, buy_status_button
-    global craft_status_button, buy_key, craft_key, buy_key_label, craft_key_label
-    global alchemist_button
+    global dropdown, selected_option
 
     # Main window Characteristics
     root = tk.Tk()
@@ -231,29 +295,29 @@ def main():
     # Strings for the labels
     selected_option = tk.StringVar()
 
-    print("Buy key:", buy_key)
+    # Keys which are needed to be pressed
     buy_key_text = tk.StringVar()
     buy_key_text.set(buy_key)
 
-    print("Craft key:", craft_key)
     craft_key_text = tk.StringVar()
     craft_key_text.set(craft_key)
 
+    # Names, labels for the keys
     buy_text = tk.StringVar()
     buy_text.set("Buy Key")
 
     craft_text = tk.StringVar()
     craft_text.set("Craft Key")
 
-    # Start and stop Logos
-    start_button_image = tk.PhotoImage(file=path[0:-7] + "\\start_button.png")
-    start_button_logo = start_button_image.subsample(7, 7)
+    # Button Logos
+    start_image = tk.PhotoImage(file=path[:len(path)-len(file_name)] + "assets\\start_button.png")
+    start_logo = start_image.subsample(7, 7)
 
-    stop_button_image = tk.PhotoImage(file=path[0:-8] + "\\stop_button.png")
-    stop_button_logo = stop_button_image.subsample(7, 7)
+    stop_image = tk.PhotoImage(file=path[:len(path)-len(file_name)] + "assets\\stop_button.png")
+    stop_logo = stop_image.subsample(7, 7)
 
-    alchemist_image = tk.PhotoImage(file=path[0:-7] + "alchemist.png")
-    alchemist_logo = alchemist_image.subsample(2, 2)
+    npc_image = tk.PhotoImage(file=path[:len(path)-len(file_name)] + "assets\\alchemist.png")
+    npc_logo = npc_image.subsample(2, 2)
 
     # Dropdown for picking window
     dropdown = tk.ttk.Combobox(root, textvariable=selected_option, values=options, state="readonly")
@@ -261,18 +325,18 @@ def main():
     dropdown.place(x=75, y=30)
     dropdown.bind("<<ComboboxSelected>>", on_dropdown_select)
 
-    # Start and Stop Buttons
-    buy_status_button = tk.Button(root, image=start_button_logo)
-    buy_status_button.place(x=35, y=90)
-    buy_status_button.config(command=change_buy_key)
+    # Buttons
+    buy_button = tk.Button(root, image=start_logo)
+    buy_button.place(x=35, y=90)
+    buy_button.config(command=lambda: change_buy_key(buy_key_label))
 
-    craft_status_button = tk.Button(root, image=start_button_logo)
-    craft_status_button.place(x=125, y=90)
-    craft_status_button.config(command=change_craft_key)
+    craft_button = tk.Button(root, image=start_logo)
+    craft_button.place(x=125, y=90)
+    craft_button.config(command=lambda: change_craft_key(craft_key_label))
 
-    alchemist_button = tk.Button(root, image=alchemist_logo)
-    alchemist_button.place(x=205, y=95)
-    alchemist_button.config(command=alchemist_button_location)
+    npc_button = tk.Button(root, image=npc_logo)
+    npc_button.place(x=205, y=95)
+    npc_button.config(command=set_npc_location)
 
     # Labels
     dropdown_label = tk.Label(root, text="Choose Client:")
@@ -290,12 +354,12 @@ def main():
     craft_key_label = tk.Label(root, textvariable=craft_key_text)
     craft_key_label.place(x=150, y=190)
 
-    # Value checking threads
-    buy_key_wait_thread = Thread(target=buy)
-    buy_key_wait_thread.start()
+    # Threads
+    buy_thread = Thread(target=buy, args=(buy_button, start_logo, stop_logo))
+    buy_thread.start()
 
-    craft_key_wait_thread = Thread(target=craft)
-    craft_key_wait_thread.start()
+    craft_thread = Thread(target=craft, args=(craft_button, start_logo, stop_logo))
+    craft_thread.start()
 
     root.resizable(False, False)
     root.mainloop()
@@ -303,8 +367,18 @@ def main():
 
 if __name__ == "__main__":
     try:
+        # Creates a batch file to run the script from command line
         with open('start.bat', 'w') as f:
             f.write(f'cd /\ncd {path[0:-8]}\npython main.py')
+
         main()
-    except Exception as e:
-        print(e)
+    except Exception as error:
+        # Get error type, file and line
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+
+        # Write error to log file
+        f = open("logerror.txt", "a")
+        f.write(str(datetime.datetime.now()) + ": " + str(exc_type) + " FILE:" + str(fname) + " Line:" + str(
+            exc_tb.tb_lineno) + "\n")
+        f.close()

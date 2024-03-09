@@ -1,0 +1,23 @@
+#################################
+#				#
+#	SOFTWARE NEEDED		#	
+#				#
+#  1. Python (Preferably 3.10)	#
+#  2. Python adequate modules	#
+#				#
+#################################
+
+
+# Python
+Install Python from https://www.python.org/
+Preferably add to PATH while installing
+
+
+# Python Modules
+For needed modules use pip or run autoconfig.py
+
+
+## How to run
+1. Install Python
+2. Install modules(Run autoconfig.py)
+3. Run main.py

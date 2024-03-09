@@ -26,16 +26,16 @@ import win32gui
 
 
 # Development
-admin = True # True - Run script as administrator;  False - do not run script as administrator(can affect mouse and keyboard input)
-debug = False # Logger not yet implemented
-time_to_die_in_seconds = 999999 # Default 6 hours (21600); when the script will terminate itself
+admin = True  # True - Run script as administrator;  False - do not run script as administrator(can affect mouse and keyboard input)
+debug = False  # Logger not yet implemented
+time_to_die_in_seconds = 999999  # Default 6 hours (21600); when the script will terminate itself
 
 # Script and window variables
 window_position = (0, 0, 1920, 1080)
 file_name = os.path.basename(__file__)
 path = os.path.abspath(__file__)
-options = [] # List of handles
-hwnd = None # Current handle
+options = []  # List of handles
+hwnd = None  # Current handle
 
 # Global thread variables to indicate if the function should run or not; Default not running
 f1_state, f2_state, f3_state, f4_state = False, False, False, False
@@ -52,11 +52,11 @@ attack_button_location = None
 
 
 def is_admin():
-    '''
-    Function returns whether the script is run as administrator or not
-    input - None
-    output - Integer based boolean: 0 or 1
-    '''
+    """
+        Function returns whether the script is run as administrator or not
+        input - None
+        output - Integer based boolean: 0 or 1
+    """
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except Exception.args:
@@ -64,22 +64,22 @@ def is_admin():
 
 
 def add_hwnd_option(new_option):
-    '''
-    Function appends a new integer value for the window handle to the dropdown selecetion list
-    input - new window handle; type INT
-    output - None
-    '''
+    """
+        Function appends a new integer value for the window handle to the dropdown selection list
+        input - new window handle; type INT
+        output - None
+    """
     if new_option:
         options.append(new_option)
         dropdown['values'] = tuple(options)
 
 
 def get_window_handles():
-    '''
-    Function wraps all the window handles for the Windows API
-    input - None
-    output - None
-    '''
+    """
+        Function wraps all the window handles for the Windows API
+        input - None
+        output - None
+    """
     def get_handles(hwnd, *args):
         if win32gui.GetWindowText(hwnd) == "METIN2" and hwnd not in options:
             add_hwnd_option(hwnd)
@@ -89,39 +89,40 @@ def get_window_handles():
 
 
 def get_window_size_and_location(hwnd):
-    '''
-    Function retrieves window physical details
-    input - window handle; Type INT
-    output - position, height, width; type INT Tuple
-    '''
+    """
+        Function retrieves window physical details
+        input - window handle; Type INT
+        output - position, height, width; type INT Tuple
+    """
     rectangle = win32gui.GetWindowRect(hwnd)
     x = rectangle[0]
     y = rectangle[1]
     width = rectangle[2] - x
     height = rectangle[3] - y
+
     win32gui.SetForegroundWindow(hwnd)
 
     return x, y, width, height
 
 
 def on_dropdown_select(event):
-    '''
-    Function handles the Tkinter dropdown event in GUI
-    input - Tkinter event
-    output - None
-    '''
+    """
+        Function handles the Tkinter dropdown event in GUI
+        input - Tkinter event
+        output - None
+    """
     selected_value = hwnd = selected_option.get()
     get_window_handles()
     window_position = get_window_size_and_location(selected_value)
 
 
 def search_image_and_get_coordinates(image_path, search_area=None):
-    '''
-    Function detects an image on the screen and retrieves it's center coordinates
-    input - image path; Type STR
-          - search_area; Type INT LIST
-    output - image center; type INT TUPLE or None
-    '''
+    """
+        Function detects an image on the screen and retrieves its center coordinates
+        input - image path; Type STR
+              - search_area; Type INT LIST
+        output - image center; type INT TUPLE or None
+    """
     screenshot = pyautogui.screenshot()
     x, y, w, z = 0, 0, 0, 0
 
@@ -153,27 +154,27 @@ def search_image_and_get_coordinates(image_path, search_area=None):
 
 
 def get_to_foreground():
-    '''
-    Function sends window to the foreground
-    input - None
-    output - None 
-    '''
+    """
+        Function sends window to the foreground
+        input - None
+        output - None
+    """
     while running_state:
         try:
             # If window is not in foreground, send it to foreground
             if not ctypes.windll.user32.GetForegroundWindow() == int(hwnd):
                 win32gui.SetForegroundWindow(hwnd)
-        except Exception as e:
+        except Exception as error:
             pass
         time.sleep(1)
 
 
 def run_threads():
-    '''
-    Function starts threads for all the functionalities: keyboard input, mouse input and image detection
-    input - None
-    output - None
-    '''
+    """
+        Function starts threads for all the functionalities: keyboard input, mouse input and image detection
+        input - None
+        output - None
+    """
     # Window Thread
     window_thread = Thread(target=get_to_foreground)
     window_thread.start()
@@ -197,11 +198,11 @@ def run_threads():
 
 
 def button_thread(button_name):
-    '''
-    Function sends keyboard input based on key name at a time interval
-    input - button_name; Type STR
-    output - None
-    '''
+    """
+        Function sends keyboard input based on key name at a time interval
+        input - button_name; Type STR
+        output - None
+    """
     timer = time.time()
     while running_state:
         # If button_state(e.g f1_state)is True and timer indicates it passed the mark send key inputs
@@ -217,23 +218,23 @@ def button_thread(button_name):
 
 
 def revive():
-    '''
-    Function revives the character by detecting revive button on screen and then sends key inputs
-    input - None
-    output - None
-    '''
+    """
+        Function revives the character by detecting revive button on screen and then sends key inputs
+        input - None
+        output - None
+    """
 
     global running_state
     found_revive_button = False
 
-    '''
-    The following timers represents last time the code was run and last time the detection was made:
-        - timer -> will check if the loop was already ran once in the last # seconds
-        - last_check -> will check if the button detection was already made in the last # seconds
-        
-    Inside loop will run as long as the revive button is detected and mouse input
-    was unable to press on it, that is why 2 timers are needed
-    '''
+    """
+        The following timers represents last time the code was run and last time the detection was made:
+            - timer -> will check if the loop was already ran once in the last # seconds
+            - last_check -> will check if the button detection was already made in the last # seconds
+            
+        Inside loop will run as long as the revive button is detected and mouse input
+        was unable to press on it, that is why 2 timers are needed
+    """
     timer = time.time()
     last_check = time.time()
     
@@ -314,11 +315,11 @@ def revive():
 
 
 def windows_notification(message):
-    '''
-    Function creates a windows notification when bot starts or stops
-    input - message; Type STR
-    output - None
-    '''
+    """
+        Function creates a windows notification when bot starts or stops
+        input - message; Type STR
+        output - None
+    """
     try:
         toast = ToastNotifier()
         toast.show_toast(
@@ -333,11 +334,11 @@ def windows_notification(message):
 
 
 def start(running_button, running_start_logo, running_stop_logo):
-    '''
-    Function starts all the threads while indicating changes by alternating running_button logo
-    input - None
-    output - None
-    '''
+    """
+        Function starts all the threads while indicating changes by alternating running_button logo
+        input - None
+        output - None
+    """
     global running_state
     keyboard.wait("f5")
     # If not running -> send notification, run, start threads and start itself again
@@ -356,11 +357,11 @@ def start(running_button, running_start_logo, running_stop_logo):
 
 
 def display_message_box():
-    '''
-    Function handles a GUI pop-up and saves mouse location
-    input - None
-    output - None
-    '''
+    """
+        Function handles a GUI pop-up and saves mouse location
+        input - None
+        output - None
+    """
     # Wait while user has not pressed pop-up button yet
     global message_box_response
     while message_box_response != "ok":
@@ -385,14 +386,14 @@ def display_message_box():
 
 # def change_buttons_state(key_name):
 def change_buttons_state(key_name, button, start_logo, stop_logo):
-    '''
-    Function changes threads state dynamically and alternates button logos
-    input - key_name; Type STR
-          - button; Type Tkinter.Button Object
-          - start_logo; Type Tkinter PhotoImage object
-          - stop_logo; Type Tkinter PhotoImage object
-    output - None
-    '''
+    """
+        Function changes threads state dynamically and alternates button logos
+        input - key_name; Type STR
+              - button; Type Tkinter.Button Object
+              - start_logo; Type Tkinter PhotoImage object
+              - stop_logo; Type Tkinter PhotoImage object
+        output - None
+    """
     # If button state is False -> set value to True
     if not globals().get(key_name + "_state"):
         globals()[key_name + "_state"] = True
@@ -592,13 +593,18 @@ def main():
 
 if __name__ == "__main__":
     try:
+        # Creates a batch file to run the script from command line
+        with open('start.bat', 'w') as f:
+            f.write(f'cd /\ncd {path[0:-8]}\npython main.py')
+
         main()
-    except Exception as e:
+    except Exception as error:
         # Get error type, file and line
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 
         # Write error to log file
         f = open("logerror.txt", "a")
-        f.write(str(datetime.datetime.now()) + ": " + str(exc_type) + " FILE:" + str(fname) + " Line:" +  str(exc_tb.tb_lineno) + "\n")
+        f.write(str(datetime.datetime.now()) + ": " + str(exc_type) + " FILE:" + str(fname) + " Line:" +  str(
+            exc_tb.tb_lineno) + "\n")
         f.close()
