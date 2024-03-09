@@ -22,14 +22,14 @@ You will need the latest Python version available, preferably 3.10 which this bo
 </details>
 
 ## Documentation
-Gamebot is composed of two single-window GUIs made with Tkinter
+Gamebot is composed of two single-window GUIs made with Tkinter and requires Windows to run.
 
 It is split in 2 version:
--LevelBot which is able to press keys and click on revive button and auto-attack window implemented in game:
+- LevelBot which is able to press keys and click on revive button and auto-attack window implemented in game:
 
 ![](README_Assets/LevelBot.png)
 
--EnergyBot which is able to grind energy fragments by putting them on the alchemist; EnergyBot is semi-automated since it still needs user assistance and monitoring:
+- EnergyBot which is able to grind energy fragments by putting them on the alchemist; EnergyBot is semi-automated since it still needs user assistance and monitoring:
 
 ![](README_Assets/EnergyBot.png)
 
