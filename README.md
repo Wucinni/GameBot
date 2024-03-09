@@ -24,7 +24,7 @@ You will need the latest Python version available, preferably 3.10 which this bo
 ## Documentation
 Gamebot is composed of two single-window GUIs made with Tkinter and requires Windows to run.
 
-It is split in 2 version:
+It is split in 2 versions:
 - LevelBot which is able to press keys and click on revive button and auto-attack window implemented in game:
 
 ![](README_Assets/LevelBot.png)
