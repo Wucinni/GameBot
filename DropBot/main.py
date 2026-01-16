@@ -110,34 +110,9 @@ def search_image_and_get_coordinates(image_path, search_area=None):
                   - search_area; Type INT LIST
             output - image center; type INT TUPLE or None
     """
-    screenshot = pyautogui.screenshot()
-    x, y, w, z = 0, 0, 0, 0
-
-    # Search image on screen
-    if search_area:
-        if search_area[0] > 0:
-            x = search_area[0]
-        if search_area[1] > 0:
-            y = search_area[1]
-        if search_area[2] > 0:
-            w = search_area[2]
-        if search_area[3] > 0:
-            z = search_area[3]
-        search_zone = (x, y, w, z)
-        location = pyautogui.locateOnScreen(image_path, region=search_zone, confidence=0.8)
-    else:
-        location = pyautogui.locateOnScreen(image_path, confidence=0.8)
-
-    # If image was found, return center coordinates
-    if location is not None:
-        x, y, width, height = location
-        center_x = x + width // 2
-        center_y = y + height // 2
-        return center_x, center_y
-
-    # In case of fail return None
-    else:
-        return None
+    location = pyautogui.locateOnScreen(image_path, region=search_area, confidence=0.8, grayscale=True)
+    
+    return pyautogui.center(location) if location else None
 
 
 def buy(button, start_logo, stop_logo):
@@ -202,7 +177,9 @@ def craft(button, start_logo, stop_logo):
                     for spot in npc_location:
                         pyautogui.moveTo(spot[0], spot[1], 0.2)
                         pyautogui.click(button='left')
-                    time.sleep(0.05)
+                        time.sleep(0.05)
+                        
+                    time.sleep(0.2)
 
             except Exception as e:
                 print(e)
